@@ -1,17 +1,14 @@
-import { _decorator, Component, log, Node, Sprite, SpriteFrame, tween, Vec3 } from 'cc';
-import { TypeKeeper } from '../data/Basic';
+import { _decorator, CapsuleCollider, Component, easing, log, Node, Sprite, SpriteFrame, tween, Vec3 } from 'cc';
+import { Configute, TypeKeeper } from '../data/Basic';
 const { ccclass, property } = _decorator;
 
 @ccclass('ItemCube')
 export class ItemCube extends Component {
 
-    x: number = -1
-    y: number = -1
-    z: number = -1
-
+    nameKeeper: String = "";
+    indexInStack: number = -1;
     type: number = -1;
 
-    isAnim: boolean = false;
 
     @property({ type: Node })
     icon: Node = null;
@@ -28,20 +25,32 @@ export class ItemCube extends Component {
         return this.type;
     }
 
+    setNameKeeper(name: string) {
+        this.nameKeeper = name;
+    }
+
+    getNameKeeper() {
+        return this.nameKeeper;
+    }
+    getIndexInStack() {
+        return this.indexInStack;
+    }
+
+    setIndexInStack(i: number) {
+        this.indexInStack = i;
+    }
 
     setType(type: number) {
         this.type = type;
     }
 
-    move(to: Vec3, from: Vec3, time: number) {
+    moving(to: Vec3 = null, from: Vec3, time: number) {
         // all world posion
         let t = this;
-        t.node.setPosition(to);
-        t.isAnim = true
+        to != null ? t.node.setPosition(to) : 0
         tween(t.node)
             .to(time, { position: from })
             .call(() => {
-                t.isAnim = false;
             })
             .start()
     }
@@ -52,7 +61,13 @@ export class ItemCube extends Component {
     }
 
     turnLight(isActive: boolean) {
-        this.light.active = isActive;
+        let t = this;
+        t.light.active = isActive;
+        tween(t.node)
+            .by(Configute.timeAnim / 3, { position: new Vec3(0, isActive ? 30 : -30, 0) }, { easing: easing.quadOut })
+            .call(() => {
+            })
+            .start();
     }
 
     setPos(pos: Vec3) {

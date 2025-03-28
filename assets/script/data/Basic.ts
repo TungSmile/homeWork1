@@ -38,7 +38,10 @@ export enum statusTouch {
     LoadTo = 2,
     LoadFrom = 3,
     Cancel = 4
+}
 
-
+export enum typeSpecial {
+    empty = -1,
+    doneSlot = -2
 }
 

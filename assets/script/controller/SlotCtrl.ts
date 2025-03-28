@@ -57,10 +57,9 @@ export class SlotCtrl extends Component {
 
 
 
-
     eventTouchPick(e) {
         let t = this;
-        t.node.parent.emit("loadPlaceTouch", e.target, TypeKeeper.Slot);
+        t.node.parent.emit("pickSlot", e.target.name);
     }
 
 
