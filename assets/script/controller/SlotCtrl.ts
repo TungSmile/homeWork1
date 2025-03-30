@@ -55,6 +55,13 @@ export class SlotCtrl extends Component {
         return rs ? rs : null;
     }
 
+    doneSlot(name: string) {
+        let t = this;
+        let slot = t.node?.getChildByName(name);
+        slot.off(Node.EventType.TOUCH_START, t.eventTouchPick, t);
+        slot.getComponent(SlotHold).animClose();
+    }
+
 
 
     eventTouchPick(e) {

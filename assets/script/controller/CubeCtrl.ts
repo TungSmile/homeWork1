@@ -89,6 +89,15 @@ export class CubeCtrl extends Component {
     }
 
 
+    CleanCubeByName(nameKeeper: string) {
+        let t = this;
+        t.node.children.forEach(cube => {
+            let temp = cube.getComponent(ItemCube);
+            temp.getNameKeeper() == nameKeeper ? cube.destroy() : 0
+        })
+    }
+
+
     update(deltaTime: number) {
 
     }

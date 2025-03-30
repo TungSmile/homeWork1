@@ -147,6 +147,7 @@ export class GameLogic extends Component {
         let t = this;
         // touch frist time to pick slot
         log("Slot", nameSlot);
+
         if (t.oneTouch == null) {
             t.oneTouch = nameSlot;
             // check cube in frist element
@@ -156,6 +157,8 @@ export class GameLogic extends Component {
             t.listIndexCubesPick = t.getAllCubeBYSlotAndType(indexSlotPick, t.typeCubePick);
             t.turnLightListCube(true);
             log(t.typeCubePick, t.listIndexCubesPick, "case touch1")
+            console.log(t.typeCubePick, t.listIndexCubesPick, "case touch1");
+
             return
         }
         // touch duoble to 1 slot for cancle
@@ -284,7 +287,12 @@ export class GameLogic extends Component {
         // continue this
         t.actionMoveOfCube(rs);
         if (t.checkSlotDoneMission(t.readNameCustoms(t.twoTouch))) {
-            log("Done")
+            //slove slot
+            t.Slot.doneSlot(t.twoTouch);
+            // slove cube
+            t.Cube.CleanCubeByName(t.twoTouch)
+            console.log(t.twoTouch, "wtf");
+
         } else log("NoDone");
         t.cancelPick();
     }
@@ -307,7 +315,7 @@ export class GameLogic extends Component {
         // let index = t.readNameCustoms(t.twoTouch);
         let slot = t.dataSlot[index];
         let temp = []
-        for (let i = 1; i < slot.length; i++) {
+        for (let i = 0; i < slot.length; i++) {
             if (slot[i] != slot[0]) {
                 return false;
             }

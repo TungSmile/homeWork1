@@ -33,9 +33,14 @@ export class SlotHold extends Component {
         if (t.capasity > 3) {
             t.node.getChildByName("door").setPosition(new Vec3(0, Configute.heightCube * t.capasity, 0));
             t.node.getChildByName("cells").getComponent(UITransform).setContentSize(new Size(127, Configute.heightCube * t.capasity));
+            t.node.getChildByName("door").getComponent(UITransform).setContentSize(new Size(113, Configute.heightCube * t.capasity));
+            t.node.getChildByName("door").setPosition(new Vec3(2, Configute.heightCube * (t.capasity - 1), 0))
+            t.node.getChildByName("lightDone").getComponent(UITransform).setContentSize(new Size(175, Configute.heightCube * t.capasity));
+            t.node.getChildByName("done").setPosition(new Vec3(0, Configute.heightCube * (t.capasity - 1), 0))
             let partry = t.node.getChildByName("partition");
             for (let i = 0; i < t.capasity - 3; i++) {
                 let cloneParitition = instantiate(partry);
+                cloneParitition.name = "partition"
                 t.node.addChild(cloneParitition);
                 let posY = Configute.heightCube * i + Configute.heightCube;
                 cloneParitition.setPosition(new Vec3(0, posY, 0));
@@ -62,8 +67,11 @@ export class SlotHold extends Component {
         let door = t.node.getChildByName("door");
         door.active = true;
         tween(door)
-            .to(Configute.timeAnim, { position: new Vec3(0, 0, 0) })
-            .call(() => { })
+            .to(Configute.timeAnim, { position: new Vec3(2, -155, 0) })
+            .call(() => {
+                t.node.getChildByName("done").active = true;
+                t.node.getChildByName("lightDone").active = true;
+            })
             .start();
     }
 
