@@ -54,7 +54,9 @@ export class TaskMission extends Component {
 
 
 
-
+    getPos() {
+        return this.node.getWorldPosition(new Vec3);
+    }
 
 
     update(deltaTime: number) {

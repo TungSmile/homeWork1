@@ -35,18 +35,23 @@ export class SlotHold extends Component {
             t.node.getChildByName("cells").getComponent(UITransform).setContentSize(new Size(127, Configute.heightCube * t.capasity));
             t.node.getChildByName("door").getComponent(UITransform).setContentSize(new Size(113, Configute.heightCube * t.capasity));
             t.node.getChildByName("door").setPosition(new Vec3(2, Configute.heightCube * (t.capasity - 1), 0))
-            t.node.getChildByName("lightDone").getComponent(UITransform).setContentSize(new Size(175, Configute.heightCube * t.capasity));
+            t.node.getChildByName("lightDone").getComponent(UITransform).setContentSize(new Size(175, Configute.heightCube * t.capasity + 70));
+            t.node.getChildByName("lightDone").setPosition(new Vec3(0, (Configute.heightCube / 2) * (t.capasity - 3), 0))
             t.node.getChildByName("done").setPosition(new Vec3(0, Configute.heightCube * (t.capasity - 1), 0))
             let partry = t.node.getChildByName("partition");
             for (let i = 0; i < t.capasity - 3; i++) {
                 let cloneParitition = instantiate(partry);
                 cloneParitition.name = "partition"
                 t.node.addChild(cloneParitition);
-                let posY = Configute.heightCube * i + Configute.heightCube;
+                cloneParitition.setSiblingIndex(partry.getSiblingIndex());
+                let posY = Configute.heightCube * i + (Configute.heightCube - 20);
                 cloneParitition.setPosition(new Vec3(0, posY, 0));
             }
         }
     }
+
+    // -10 80 170 260
+    // 90 90 90
 
 
     getPosByIndex(id: number) {

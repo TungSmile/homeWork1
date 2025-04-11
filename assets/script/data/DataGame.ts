@@ -8,18 +8,18 @@ export class DataGame extends Component {
     private static _instance: any = null;
     static getInstance<T>(): T {
         if (this._instance === null) {
-            this._instance = new this()
+            this._instance = new this();
         }
-        return this._instance
+        return this._instance;
     }
 
     static get instance() {
-        return this.getInstance<DataGame>()
+        return this.getInstance<DataGame>();
     }
 
 
-    scriptSlot = [[1, 1, -1], [1, -1, -1], [4, 5, -1], [6, 7, -1], [-1, -1, -1]];
-    scriptTask = [1, 2, 3, 4, 5, 6, 7];
+    scriptSlot = [[0, 0, -1, -1], [0, 0, -1, -1], [3, 4, 5, -1], [2, 6, 7, -1], [1, 7, 7, -1]];
+    scriptTask = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     mapSlot = [new Vec3(-350, 250, 0), new Vec3(350, 250, 0), new Vec3(0, 0, 0), new Vec3(-350, -250, 0), new Vec3(350, -250, 0)];
     statusEvent: statusCube = statusCube.NoMove;
     countCube: number = 0;
@@ -34,6 +34,9 @@ export class DataGame extends Component {
 
 
 
+
+
+    
 
 }
 

@@ -17,7 +17,7 @@ export enum statusCube {
 }
 
 export enum Configute {
-    timeAnim = 1,
+    timeAnim = 1, // defaul 1
     heightCube = 100,
     weightSlot = 127,
     weightScene = 1080
@@ -28,8 +28,9 @@ export enum SetupGame {
     TotalTask = 4,
     Stock = 5,
     TotalSlot = 5,
-    LengthSlot = 3,
-    TotalStore = 1
+    LengthSlot = 4,
+    TotalStore = 1,
+    ConditionDone = 3
 }
 
 
@@ -42,6 +43,19 @@ export enum statusTouch {
 
 export enum typeSpecial {
     empty = -1,
-    doneSlot = -2
+    end = -2
+}
+
+export enum colorCube {
+    Orange = 0,
+    Black = 1,
+    Red = 2,
+    Violet = 3,
+    Pink = 4,
+    Yellow = 5,
+    Gray = 6,
+    Blue = 7,
+    LightBlue = 8,
+    Green = 9
 }
 

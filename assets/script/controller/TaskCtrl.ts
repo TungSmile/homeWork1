@@ -34,18 +34,29 @@ export class TaskCtrl extends Component {
             let task = instantiate(t.taskMission);
             let temp = task.getComponent(TaskMission);
             let type = t.dataCreateTask[i];
-            task.name = "T" + i
+            task.name = "T" + i;
             temp.resetTask(type, t.icons[type], t.shadows[type]);
             t.node.addChild(task);
-            let posX = startX + (sizeTask * i)
-            task.setPosition(new Vec3(posX, 0, 0))
+            let posX = startX + (sizeTask * i);
+            task.setPosition(new Vec3(posX, 0, 0));
         }
     }
 
-    
 
+    getPosTaskByName(name: string) {
+        let t = this;
+        let rs = t.node.getChildByName(name)?.getComponent(TaskMission)?.getPos()
+        return rs ? rs : null;
+    }
 
+    resetTask(name: string, type: number) {
+        let t = this;
+        t.numTask++;
+        // let newType = t.dataCreateTask[type];
+        // log(newType, "what new");
+        t.node.getChildByName(name)?.getComponent(TaskMission).resetTask(type, t.icons[type], t.shadows[type]);
 
+    }
 
     update(deltaTime: number) {
 

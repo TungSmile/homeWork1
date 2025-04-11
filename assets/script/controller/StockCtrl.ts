@@ -1,6 +1,6 @@
 import { _decorator, Component, log, Node, Vec3 } from 'cc';
-import { SetupGame } from '../data/Basic';
-const { ccclass, property } = _decorator;
+import { SetupGame, typeSpecial } from '../data/Basic';
+const { ccclass } = _decorator;
 @ccclass('StockCtrl')
 export class StockCtrl extends Component {
 
@@ -30,12 +30,11 @@ export class StockCtrl extends Component {
             let cell = allCells.children[i];
             if (i < t.activeStock) {
                 cell.active = false;
-                t.dataStock.push(0);
+                t.dataStock.push(typeSpecial.empty);
             } else {
                 cell.active = true;
                 cell.on(Node.EventType.TOUCH_START, t.moreStock, t);
-                t.dataStock.push(-1);
-                t.node.emit("test", cell)
+                t.dataStock.push(typeSpecial.end);
             }
 
 
@@ -43,13 +42,21 @@ export class StockCtrl extends Component {
     }
 
     moreStock(e) {
-       
+        let t = this;
+        log("nạp lần đầu là đc")
     }
 
 
     checkFreeStock() {
         let t = this;
-        return t.dataStock.indexOf(0); // -1 is faile
+        log("check stock", t.dataStock)
+
+        for (let i = 0; i < t.dataStock.length; i++) {
+            if (t.dataStock[i] == typeSpecial.empty) {
+                return true
+            }
+        }
+        return false
     }
 
     getPosFreeStock() {
@@ -66,16 +73,15 @@ export class StockCtrl extends Component {
 
     getIndexFreeStock() {
         let t = this;
-        if (t.checkFreeStock() != -1) {
+        if (t.checkFreeStock()) {
             for (let i = 0; i < t.dataStock.length; i++) {
-                if (t.dataStock[i] == 0) {
+                if (t.dataStock[i] == typeSpecial.empty) {
                     return i;
                 }
             }
-            log('amazing good job,check free done but not free')
-            return -1;
+            return typeSpecial.end;
         } else {
-            return -1;
+            return typeSpecial.end;
         }
     }
 
@@ -93,7 +99,7 @@ export class StockCtrl extends Component {
         let t = this;
         let id = t.findIndexStockByType(type);
         if (id != -1) {
-            t.dataStock[id] = 0;
+            t.dataStock[id] = typeSpecial.empty;
             return true;
         }
         return false;

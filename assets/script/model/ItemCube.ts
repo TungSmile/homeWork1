@@ -44,16 +44,27 @@ export class ItemCube extends Component {
         this.type = type;
     }
 
-    moving(to: Vec3 = null, from: Vec3, time: number) {
+    moving(from: Vec3, time: number) {
         // all world posion
         let t = this;
-        to != null ? t.node.setPosition(to) : 0
         tween(t.node)
             .to(time, { position: from })
             .call(() => {
             })
             .start()
     }
+
+    moveByDoneAct(from: Vec3, time: number, die: boolean = true, wait: number = 0) {
+        let t = this;
+        tween(t.node)
+            .delay(wait)
+            .to(time, { position: from })
+            .call(() => {
+                die ? t.node.destroy() : 0
+            })
+            .start()
+    }
+
 
     renderImgIcon(img: SpriteFrame) {
         let t = this;
@@ -70,14 +81,15 @@ export class ItemCube extends Component {
             .start();
     }
 
+    getPos() {
+        return this.node.getPosition(new Vec3);
+    }
+
     setPos(pos: Vec3) {
         this.node.setPosition(pos);
     }
 
 
-    update(deltaTime: number) {
-
-    }
 
 
 }

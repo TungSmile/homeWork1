@@ -1,10 +1,10 @@
-import { _decorator, Camera, Component, geometry, instantiate, log, Node, PhysicsSystem, Prefab, SpriteFrame, Vec3 } from 'cc';
+import { _decorator, Camera, Component, geometry, instantiate, log, Node, PhysicsSystem, Prefab, SpriteFrame, tween, Vec3 } from 'cc';
 import { SlotCtrl } from './SlotCtrl';
 import { StockCtrl } from './StockCtrl';
 import { TaskCtrl } from './TaskCtrl';
 import { ItemCube } from '../model/ItemCube';
 import { DataGame } from '../data/DataGame';
-import { SetupGame, statusTouch, TypeKeeper, typeSpecial } from '../data/Basic';
+import { Configute, SetupGame, statusTouch, TypeKeeper, typeSpecial } from '../data/Basic';
 import { CubeCtrl } from './CubeCtrl';
 const { ccclass, property } = _decorator;
 
@@ -37,10 +37,10 @@ export class GameLogic extends Component {
     oneTouch: string = null;
     twoTouch: string = null;
 
+    isAnim: boolean = false;
 
-    protected onLoad(): void {
-        let t = this;
-    }
+
+
 
     // logic game all sovle in script here
 
@@ -100,9 +100,10 @@ export class GameLogic extends Component {
     start() {
         let t = this;
         t.node.on("pickSlot", t.pickSlot, t);
+        t.node.on("doneSlot", t.cancelPick, t);
         t.createTask()
         t.createSlot();
-        t.createCube()
+        t.createCube();
     }
 
     createCube() {
@@ -147,7 +148,7 @@ export class GameLogic extends Component {
         let t = this;
         // touch frist time to pick slot
         log("Slot", nameSlot);
-
+        if (t.isAnim) { return }
         if (t.oneTouch == null) {
             t.oneTouch = nameSlot;
             // check cube in frist element
@@ -157,8 +158,6 @@ export class GameLogic extends Component {
             t.listIndexCubesPick = t.getAllCubeBYSlotAndType(indexSlotPick, t.typeCubePick);
             t.turnLightListCube(true);
             log(t.typeCubePick, t.listIndexCubesPick, "case touch1")
-            console.log(t.typeCubePick, t.listIndexCubesPick, "case touch1");
-
             return
         }
         // touch duoble to 1 slot for cancle
@@ -169,6 +168,7 @@ export class GameLogic extends Component {
         }
         // touch second time to drop
         if (t.oneTouch && t.twoTouch == null) {
+            t.isAnim = true;
             t.twoTouch = nameSlot;
             let indexSlotDrop = t.readNameCustoms(nameSlot);
             let typeDrop = t.getTypeCubefristBySlot(indexSlotDrop);
@@ -179,18 +179,23 @@ export class GameLogic extends Component {
                 return
             }
             if (t.typeCubePick == typeDrop) {
-                let cubesDrop = t.getAllCubeBYSlotAndType(indexSlotDrop, typeDrop);
-                if (t.listIndexCubesPick.length == t.countFreeStackBySlot(indexSlotDrop)) {
+                // let cubesDrop = t.getAllCubeBYSlotAndType(indexSlotDrop, typeDrop);
+                if (t.listIndexCubesPick.length <= t.countFreeStackBySlot(indexSlotDrop)) {
                     t.tranferDataSlot(t.readNameCustoms(t.oneTouch), indexSlotDrop, t.typeCubePick, t.listIndexCubesPick.length);
                     log(t.dataSlot, "how about data2");
-                } else
+                } else {
+                    log("case touch 3 a")
                     t.cancelPick()
+
+                }
                 return
             }
-            log("case touch 3")
+            log("case touch 3 b")
+            t.isAnim = false;
             t.cancelPick()
             return
         }
+        t.isAnim = false;
         t.cancelPick()
         log("case touch 4")
     }
@@ -205,7 +210,7 @@ export class GameLogic extends Component {
 
     readNameCustoms(name: string) {
         let index = Number(name.slice(1));
-        let type = name.slice(0, 1);
+        // let type = name.slice(0, 1);
         return index;
     }
 
@@ -250,7 +255,7 @@ export class GameLogic extends Component {
 
     countFreeStackBySlot(iSlot: number) {
         let t = this;
-        let count = 0;
+        let count: number = 0;
         let slot = t.dataSlot[iSlot];
         for (let i = slot.length - 1; i >= 0; i--) {
             if (slot[i] == typeSpecial.empty) {
@@ -283,16 +288,18 @@ export class GameLogic extends Component {
         }
 
 
-        // need slice funtion 
-        // continue this
-        t.actionMoveOfCube(rs);
-        if (t.checkSlotDoneMission(t.readNameCustoms(t.twoTouch))) {
-            //slove slot
-            t.Slot.doneSlot(t.twoTouch);
-            // slove cube
-            t.Cube.CleanCubeByName(t.twoTouch)
-            console.log(t.twoTouch, "wtf");
 
+        t.actionMoveOfCube(rs);
+        if (t.caseDoneCube(t.readNameCustoms(t.twoTouch))) {
+            // let temp = t.twoTouch;
+            log(t.typeCubePick, "check done")
+            // t.scheduleOnce(() => {
+            //     //slove slot
+            //     t.Slot.doneSlot(temp);
+            //     // slove cube
+            //     t.Cube.CleanCubeByName(temp)
+
+            // }, Configute.timeAnim);
         } else log("NoDone");
         t.cancelPick();
     }
@@ -307,25 +314,120 @@ export class GameLogic extends Component {
             t.Cube.moveCube(t.oneTouch, t.listIndexCubesPick[i], pos);
             t.Cube.setNewAddressCube(t.oneTouch, t.listIndexCubesPick[i], t.twoTouch, indexStack)
         }
+        t.scheduleOnce(() => {
+            t.isAnim = false;
+        }, Configute.timeAnim)
 
     }
 
-    checkSlotDoneMission(index: number) {
+    caseDoneCube(index: number) {
         let t = this;
+        // continue here 
+
         // let index = t.readNameCustoms(t.twoTouch);
         let slot = t.dataSlot[index];
         let temp = []
-        for (let i = 0; i < slot.length; i++) {
-            if (slot[i] != slot[0]) {
-                return false;
+        for (let i = slot.length - 1; i >= 0; i--) {
+            if (i >= slot.length - SetupGame.ConditionDone) {
+                if (slot[i] != t.typeCubePick) {
+                    return false;
+                }
+                temp.push(typeSpecial.empty)
+            } else {
+                temp.push(slot[i]);
             }
-            temp.push(typeSpecial.doneSlot)
+
         }
+
+        log("check temp", temp.reverse())
         t.dataSlot[index] = temp;
+        let name = t.twoTouch;
+        let typeTemp = t.typeCubePick;
+
+        // sovle task & stock frist
+        let rsCheckTask = t.checkTask(t.typeCubePick);// check task have type
+        // let rsCheckStock = t.Stock.checkFreeStock();
+        let posNew = null;
+        let nameTemp = null;
+        let indexStack = null;
+        if (rsCheckTask != -1) {
+            posNew = t.Task.getPosTaskByName("T" + rsCheckTask);
+            nameTemp = "T" + rsCheckTask;
+            indexStack = rsCheckTask;
+            t.sttTaskScript++
+        } else if (t.Stock.checkFreeStock()) {
+            let idStock = t.Stock.getPosFreeStock()
+            posNew = idStock;
+            nameTemp = "ST" + idStock;
+            indexStack = idStock;
+        } else {
+            log("case end game")
+            return false;
+        }
+
+
+
+
+        tween(t.node)
+            .delay(Configute.timeAnim)
+            .call(() => {
+                t.Cube.CleanCubeByName(name, typeTemp, nameTemp, indexStack, posNew, rsCheckTask != -1);
+            })
+            .delay(Configute.timeAnim)
+            .call(() => {
+                // t.Slot.doneSlot(name);
+                t.caseSlotDone(index, name)
+                t.isAnim = false;
+            })
+            .delay(Configute.timeAnim / 2)
+            .call(() => {
+                rsCheckTask != -1 ? t.Task.resetTask(nameTemp, DataGame.instance.scriptTask[t.sttTaskScript]) : 0;
+            })
+            .start();
+
         return true;
     }
 
 
+    caseSlotDone(index: number, name: string) {
+        let t = this;
+        let rs = true
+        t.dataSlot[index].forEach(v => {
+            if (v != typeSpecial.empty) { rs = false }
+        })
+        if (rs) {
+            t.Slot.doneSlot(name);
+        }
+        return rs;
+    }
+
+    getIdCubeCenterByIdSlot(type: number, index: number) {
+        let t = this;
+        let tempSlot = t.dataSlot[index];
+        for (let i = 0; i < tempSlot.length; i++) {
+            let e = tempSlot[i];
+
+        }
+    }
+
+
+
+    checkTask(type: number) {
+        let t = this;
+        for (let i = 0; i < t.dataTask.length; i++) {
+            if (t.dataTask[i] == type) {
+                return i
+            }
+        }
+        log(t.dataTask, "check data task")
+        return -1
+    }
+
+    checkStock() {
+        let t = this;
+
+        return true
+    }
     // pickSlot(slot: Node, typeKeeper: TypeKeeper) {
     //     let t = this;
     //     if (place) {
