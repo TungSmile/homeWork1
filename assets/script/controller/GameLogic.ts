@@ -2,9 +2,8 @@ import { _decorator, Camera, Component, geometry, instantiate, log, Node, Physic
 import { SlotCtrl } from './SlotCtrl';
 import { StockCtrl } from './StockCtrl';
 import { TaskCtrl } from './TaskCtrl';
-import { ItemCube } from '../model/ItemCube';
 import { DataGame } from '../data/DataGame';
-import { Configute, SetupGame, statusTouch, TypeKeeper, typeSpecial } from '../data/Basic';
+import { Configute, SetupGame, typeSpecial } from '../data/Basic';
 import { CubeCtrl } from './CubeCtrl';
 const { ccclass, property } = _decorator;
 
@@ -59,44 +58,6 @@ export class GameLogic extends Component {
     // móa all slock when check , use reverse browsing
 
 
-
-
-    // getIDFreeStackByIdSlot(id: number) {
-    //     let t = this;
-    //     let slot = t.dataSlot[id];
-    //     let rs = -1;
-    //     for (let i = 0; i < slot.length; i++) {
-    //         let e = slot[i];
-    //         if (e == -1) {
-    //             rs = i;
-    //         } else {
-    //             return rs;
-    //         }
-    //     }
-    //     return rs;
-    // }
-
-    // // type=-1 is find free stack
-    // getAllCubeSameTypeInASlot(id: number, type: number) {
-    //     let t = this;
-    //     let slot = t.dataSlot[id];
-    //     let rs = -1;
-    //     for (let i = slot.length - 1; i >= 0; i--) {
-    //         let e = slot[i];
-    //         if (e == type) {
-    //             rs = i;
-    //         } else {
-    //             return rs;
-    //         }
-    //     }
-    //     return rs;
-    // }
-
-
-
-
-
-
     start() {
         let t = this;
         t.node.on("pickSlot", t.pickSlot, t);
@@ -148,7 +109,12 @@ export class GameLogic extends Component {
         let t = this;
         // touch frist time to pick slot
         log("Slot", nameSlot);
-        if (t.isAnim) { return }
+        log(t.dataSlot, "slot origin")
+        if (t.isAnim) {
+            log("anim not done");
+
+            return
+        }
         if (t.oneTouch == null) {
             t.oneTouch = nameSlot;
             // check cube in frist element
@@ -174,7 +140,7 @@ export class GameLogic extends Component {
             let typeDrop = t.getTypeCubefristBySlot(indexSlotDrop);
             if (typeDrop == typeSpecial.empty) {
                 // case for slot drop empty
-                t.tranferDataSlot(t.readNameCustoms(t.oneTouch), indexSlotDrop, t.typeCubePick, t.listIndexCubesPick.length)
+                t.tranferDataSlot(t.readNameCustoms(t.oneTouch), indexSlotDrop, t.typeCubePick, t.listIndexCubesPick.length, true)
                 log(t.dataSlot, "how about data1")
                 return
             }
@@ -185,6 +151,7 @@ export class GameLogic extends Component {
                     log(t.dataSlot, "how about data2");
                 } else {
                     log("case touch 3 a")
+                    t.isAnim = false;
                     t.cancelPick()
 
                 }
@@ -261,14 +228,16 @@ export class GameLogic extends Component {
             if (slot[i] == typeSpecial.empty) {
                 count++;
             } else {
+                log("free on id", count)
                 return count;
             }
         }
+        log("free all", count)
         return count;
     }
 
 
-    tranferDataSlot(idTo: number, idFrom: number, type: number, stack: number) {
+    tranferDataSlot(idTo: number, idFrom: number, type: number, stack: number, freeAll: boolean = false) {
         let t = this;
         let rs = [];
         for (let i = t.dataSlot[idTo].length - 1; i >= 0; i--) {
@@ -279,15 +248,22 @@ export class GameLogic extends Component {
             }
         }
         let count = stack
-        for (let i = 0; i < t.dataSlot[idFrom].length; i++) {
-            if (t.dataSlot[idFrom][i] == typeSpecial.empty && count != 0) {
-                t.dataSlot[idFrom][i] = type;
-                rs.push(i)
-                count--;
+        if (freeAll) {
+            for (let i = t.dataSlot[idFrom].length - 1; i >= 0; i--) {
+                if (t.dataSlot[idFrom][i] == typeSpecial.empty && count != 0) {
+                    t.dataSlot[idFrom][i] = type;
+                    rs.push(i)
+                    count--;
+                }
             }
-        }
-
-
+        } else
+            for (let i = 0; i < t.dataSlot[idFrom].length; i++) {
+                if (t.dataSlot[idFrom][i] == typeSpecial.empty && count != 0) {
+                    t.dataSlot[idFrom][i] = type;
+                    rs.push(i)
+                    count--;
+                }
+            }
 
         t.actionMoveOfCube(rs);
         if (t.caseDoneCube(t.readNameCustoms(t.twoTouch))) {
@@ -304,19 +280,25 @@ export class GameLogic extends Component {
         t.cancelPick();
     }
 
-
     actionMoveOfCube(data) {
         let t = this;
         log(data, "check data");
         for (let i = 0; i < data.length; i++) {
             let indexStack = data[i];// index new
-            let pos = t.Slot.getPosByXY(t.readNameCustoms(t.twoTouch), indexStack);
-            t.Cube.moveCube(t.oneTouch, t.listIndexCubesPick[i], pos);
+            let cal3P = t.Slot.calculation3Point(t.readNameCustoms(t.oneTouch), t.readNameCustoms(t.twoTouch), indexStack)
+
+            let pos1 = cal3P[0];
+            let pos2 = cal3P[1];
+            let pos3 = cal3P[2];
+            // let pos = t.Slot.getPosByXY(t.readNameCustoms(t.twoTouch), indexStack);
+            // t.Cube.moveCube(t.oneTouch, t.listIndexCubesPick[i], pos);
+            t.Cube.cubeRunByRoad3P(t.oneTouch, t.listIndexCubesPick[i], pos1, pos2, pos3)
+
             t.Cube.setNewAddressCube(t.oneTouch, t.listIndexCubesPick[i], t.twoTouch, indexStack)
         }
         t.scheduleOnce(() => {
             t.isAnim = false;
-        }, Configute.timeAnim)
+        }, Configute.timeAnim * 2)
 
     }
 
@@ -326,21 +308,39 @@ export class GameLogic extends Component {
 
         // let index = t.readNameCustoms(t.twoTouch);
         let slot = t.dataSlot[index];
-        let temp = []
-        for (let i = slot.length - 1; i >= 0; i--) {
-            if (i >= slot.length - SetupGame.ConditionDone) {
-                if (slot[i] != t.typeCubePick) {
-                    return false;
-                }
-                temp.push(typeSpecial.empty)
-            } else {
-                temp.push(slot[i]);
-            }
+        let temp = slot.reverse();
+        let checkDoneCube = false;
+        log("check temp2", temp)
 
+        // for (let i = slot.length - 1; i >= 0; i--) {
+        //     if (i >= slot.length - SetupGame.ConditionDone) {
+        //         if (slot[i] != t.typeCubePick) {
+        //             return false;
+        //         }
+        //         temp.push(typeSpecial.empty)
+        //     } else {
+        //         temp.push(slot[i]);
+        //     }
+        // }
+
+        // log("check temp", temp.reverse())
+
+        for (let i = 0; i < temp.length - 2; i++) {
+            if (temp[i] > typeSpecial.empty && temp[i] == temp[i + 1] && temp[i + 1] == temp[i + 2]) {
+                temp[i] = temp[i + 1] = temp[i + 2] = typeSpecial.empty;
+                checkDoneCube = true;
+                break;
+            } else if (temp[i] != typeSpecial.empty) {
+                log("cade not done", temp[i], i)
+                return false;
+            }
+        }
+        if (!checkDoneCube) {
+            return false;
         }
 
-        log("check temp", temp.reverse())
-        t.dataSlot[index] = temp;
+        log(t.dataSlot[index], temp, "after done")
+        t.dataSlot[index] = temp.reverse();
         let name = t.twoTouch;
         let typeTemp = t.typeCubePick;
 
@@ -369,7 +369,7 @@ export class GameLogic extends Component {
 
 
         tween(t.node)
-            .delay(Configute.timeAnim)
+            .delay(Configute.timeAnim * 2)
             .call(() => {
                 t.Cube.CleanCubeByName(name, typeTemp, nameTemp, indexStack, posNew, rsCheckTask != -1);
             })
@@ -387,13 +387,15 @@ export class GameLogic extends Component {
 
         return true;
     }
-
-
+    
     caseSlotDone(index: number, name: string) {
         let t = this;
-        let rs = true
+        let rs = true;
+        log(t.dataSlot[index]);
         t.dataSlot[index].forEach(v => {
-            if (v != typeSpecial.empty) { rs = false }
+            if (v != typeSpecial.empty) {
+                rs = false
+            }
         })
         if (rs) {
             t.Slot.doneSlot(name);
@@ -409,8 +411,6 @@ export class GameLogic extends Component {
 
         }
     }
-
-
 
     checkTask(type: number) {
         let t = this;

@@ -17,9 +17,13 @@ export class DataGame extends Component {
         return this.getInstance<DataGame>();
     }
 
-
-    scriptSlot = [[0, 0, -1, -1], [0, 0, -1, -1], [3, 4, 5, -1], [2, 6, 7, -1], [1, 7, 7, -1]];
+    scriptCube = [0, 0, -1, -1, 1, 0, -1, -1, 8, 3, 4, 5, 2, 2, 6, 7, 1, 1, 7, 7];
+    scriptSlot = [[-1, -1, 0, 0], [-1, 0, 1, 1], [8, 3, 4, 5], [2, 2, 6, 7], [1, 1, 7, 7]];
     scriptTask = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+
+
+
     mapSlot = [new Vec3(-350, 250, 0), new Vec3(350, 250, 0), new Vec3(0, 0, 0), new Vec3(-350, -250, 0), new Vec3(350, -250, 0)];
     statusEvent: statusCube = statusCube.NoMove;
     countCube: number = 0;
@@ -36,7 +40,7 @@ export class DataGame extends Component {
 
 
 
-    
+
 
 }
 

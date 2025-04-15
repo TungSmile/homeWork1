@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Size, tween, UITransform, Vec3, Node, log } from 'cc';
+import { _decorator, Component, instantiate, Size, tween, UITransform, Vec3, Node, log, Mat4 } from 'cc';
 import { Configute, TypeKeeper } from '../data/Basic';
 const { ccclass } = _decorator;
 
@@ -50,8 +50,7 @@ export class SlotHold extends Component {
         }
     }
 
-    // -10 80 170 260
-    // 90 90 90
+
 
 
     getPosByIndex(id: number) {
@@ -62,8 +61,17 @@ export class SlotHold extends Component {
         }
         let temp = t.node.getChildByName("tempPosition");
         let posX = Configute.heightCube * id - (Configute.heightCube + 20);
+        // let localPos = new Vec3(0, posX, 0);
+        // let worldPos = new Vec3();
+        // t.node.getWorldPosition(worldPos);
+        // Vec3.add(worldPos, worldPos, localPos);
         temp.setPosition(new Vec3(0, posX, 0));
-        return temp.getWorldPosition(new Vec3)
+        return temp.getWorldPosition(new Vec3);
+    }
+
+
+    getPosGateSlot() {
+        return this.node.getChildByName("done").getWorldPosition(new Vec3);
     }
 
 
@@ -78,6 +86,31 @@ export class SlotHold extends Component {
                 t.node.getChildByName("lightDone").active = true;
             })
             .start();
+    }
+
+    getPosByStack(stack: number) {
+        let t = this;
+        if (stack >= t.capasity) {
+            log("wrong , over capacity of slot")
+            return null;
+        }
+        // 120 20 80 160  // 4    // [-1,-1, 1, 1]
+        // 0  1  2  3            //   3  2 1 0
+        let posX =
+            // Configute.heightCube * stack - (Configute.heightCube + 20)
+            Configute.heightCube * ((t.capasity - 1) - stack) - (Configute.heightCube + 20);
+
+        // let temp = t.node.getChildByName("tempPosition");
+        // temp.setPosition(new Vec3(0, posX, 0));
+        // return temp.getWorldPosition(new Vec3);
+
+        let localPos = new Vec3(0, posX, 0);
+        let worldPos = new Vec3();
+        t.node.getWorldPosition(worldPos);
+        // Vec3.add(worldPos, worldPos, localPos);
+        const worldMatrix: Mat4 = t.node.getWorldMatrix();
+        Vec3.transformMat4(worldPos, localPos, worldMatrix)
+        return worldPos;
     }
 
     update(deltaTime: number) {

@@ -1,7 +1,7 @@
 import { _decorator, Component, instantiate, log, Node, Prefab, SpriteFrame, Vec3 } from 'cc';
 import { DataGame } from '../data/DataGame';
 import { ItemCube } from '../model/ItemCube';
-import { Configute, SetupGame } from '../data/Basic';
+import { Configute, idX, SetupGame } from '../data/Basic';
 const { ccclass, property } = _decorator;
 
 @ccclass('CubeCtrl')
@@ -144,8 +144,6 @@ export class CubeCtrl extends Component {
     }
 
 
-
-
     // useless 
     animCombinedCube(nameKeeper: string, type: number, step: number) {
         let t = this;
@@ -166,13 +164,107 @@ export class CubeCtrl extends Component {
     }
 
 
-    cubeRunByRoad(name: string, index: number, road: [Vec3]) {
+    cubeRunByRoad3P(name: string, index: number, p1: Vec3, p2: Vec3, p3: Vec3) {
         let t = this;
-        let time = Configute.timeAnim / road.length;
-        let cube = t.findCubeByNameKeeperAndIndex(name, index);
+        let pos1 = t.node.inverseTransformPoint(new Vec3(), p1);
+        let pos2 = t.node.inverseTransformPoint(new Vec3(), p2);
+        let pos3 = t.node.inverseTransformPoint(new Vec3(), p3);
+        log(pos1, pos2, pos3)
+        t.node.children.forEach(cube => {
+            let temp = cube.getComponent(ItemCube);
+            if (temp.getNameKeeper() == name && temp.getIndexInStack() == index) {
+                // temp.moving(pos, Configute.timeAnim);
+                temp.move3Point(pos1, pos2, pos3, Configute.timeAnim * 2, temp.getIndexInStack() * 0.1)
+                temp.turnLight(false);
+                cube.setSiblingIndex(t.node.children.length)
+            }
+        })
 
 
     }
+
+
+
+    /// nem logic
+
+    createNewCube(X: number, Y: number, posWrold: Vec3, imgIcon: SpriteFrame, isShow: boolean = true) {
+        let t = this;
+        let cube = instantiate(t.Cube);
+        let temp = cube.getComponent(ItemCube);
+        let pos = t.node.inverseTransformPoint(new Vec3(), posWrold);
+        cube.name = "C" + DataGame.instance.countCube;
+        DataGame.instance.countCube++;
+        temp.getComponent(ItemCube).renderImgIcon(imgIcon);
+        temp.setPos(pos);
+        temp.setXindex(X);
+        temp.setYindex(Y);
+        t.node.addChild(cube);
+        // t.node.setSiblingIndex()
+        cube.active = isShow;
+    }
+
+    findCubeByXY(X: number, Y: number) {
+        let t = this;
+        for (let i = 0; i < t.node.children.length; i++) {
+            let e = t.node.children[i];
+            let cube = e.getComponent(ItemCube);
+            if (cube.getXindex() == X && cube.getYindex() == Y) {
+                t.cubeTemp = e;
+                return;
+            }
+        }
+        t.cubeTemp = null;
+    }
+
+    lightCube(isOn: boolean) {
+        let t = this;
+        if (t.cubeTemp != null) {
+            t.cubeTemp.getComponent(ItemCube).turnLight(isOn);
+        }
+    }
+
+
+    // animation when cube picked
+    AWCP(X: number, Y: number) {
+        let t = this;
+        for (let i = 0; i < t.node.children.length; i++) {
+            let e = t.node.children[i];
+            let cube = e.getComponent(ItemCube);
+            if (cube.getXindex() == X && cube.getYindex() == Y) {
+                cube.turnLight(true);
+            }
+        }
+
+    }
+
+    // animation when cube drop
+    AWCD(X: number, Y: number) {
+        let t = this;
+        for (let i = 0; i < t.node.children.length; i++) {
+            let e = t.node.children[i];
+            let cube = e.getComponent(ItemCube);
+            if (cube.getXindex() == X && cube.getYindex() == Y) {
+                cube.turnLight(false);
+            }
+        }
+
+    }
+
+    // cube move from slot to new slot
+    CMFSTNS(X: number, Y: number, posTo: Vec3, posCenter: Vec3, posFrom: Vec3, wait: number) {
+        let t = this;
+        let to = t.node.inverseTransformPoint(new Vec3(), posTo);
+        let center = t.node.inverseTransformPoint(new Vec3(), posCenter);
+        let from = t.node.inverseTransformPoint(new Vec3(), posFrom);
+        let cube = t.cubeTemp.getComponent(ItemCube)
+        cube.move3Point(to, center, from, Configute.timeAnim * 2, wait)
+        cube.turnLight(false);
+        t.cubeTemp.setSiblingIndex(t.node.children.length)
+        cube.setXindex(X);
+        cube.setYindex(Y);
+    }
+
+
 
     update(deltaTime: number) {
 

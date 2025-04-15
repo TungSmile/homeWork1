@@ -39,7 +39,9 @@ export class SlotCtrl extends Component {
             e.getComponent(UITransform).setContentSize(new Size(Configute.weightSlot, cap * Configute.heightCube))
             t.node.addChild(e);
             e.setPosition(t.mapPosQuantity[i]);
-            e.on(Node.EventType.TOUCH_START, t.eventTouchPick, t);
+            // e.on(Node.EventType.TOUCH_START, t.eventTouchPick, t);
+            e.on(Node.EventType.TOUCH_START, t.eventTouchSlot, t);
+
         }
     }
 
@@ -54,6 +56,19 @@ export class SlotCtrl extends Component {
         let rs = t.node.getChildByName("S" + XSlot).getComponent(SlotHold).getPosByIndex(YStack);
         return rs ? rs : null;
     }
+
+
+    calculation3Point(from: number, to: number, toStack: number) {
+        let t = this;
+        let gateFrom: Vec3 = t.node.getChildByName("S" + from).getComponent(SlotHold).getPosGateSlot();
+        let gateTo: Vec3 = t.node.getChildByName("S" + to).getComponent(SlotHold).getPosGateSlot();
+        let start: Vec3 = new Vec3(gateFrom.x, gateFrom.y > gateTo.y ? gateFrom.y : gateTo.y, 0)
+        let road: Vec3 = new Vec3(gateTo.x, gateFrom.y > gateTo.y ? gateFrom.y : gateTo.y, 0);
+        let end: Vec3 = t.node.getChildByName("S" + to).getComponent(SlotHold).getPosByIndex(toStack)
+        return [start, road, end]
+    }
+
+
 
     doneSlot(name: string) {
         let t = this;
@@ -73,6 +88,31 @@ export class SlotCtrl extends Component {
         let t = this;
         t.node.parent.emit("pickSlot", e.target.name);
     }
+
+
+
+
+    // new logic
+
+    getPosStack(x: number, y: number) {
+        let t = this;
+        let pos = t.node.getChildByName("S" + x).getComponent(SlotHold).getPosByStack(y);
+        return pos;
+    }
+
+
+    eventTouchSlot(e) {
+        let t = this;
+        t.node.parent.emit("pickSlot", e.target.name);
+    }
+
+    getPosGateSlot(x: number) {
+        let t = this;
+        let pos = t.node.getChildByName("S" + x).getComponent(SlotHold).getPosGateSlot();
+        return pos;
+
+    }
+
 
 
     update(deltaTime: number) {

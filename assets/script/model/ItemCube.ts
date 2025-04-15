@@ -9,6 +9,10 @@ export class ItemCube extends Component {
     indexInStack: number = -1;
     type: number = -1;
 
+    XIndex: number;
+    YIndex: number;
+
+    positionStand: Vec3
 
     @property({ type: Node })
     icon: Node = null;
@@ -16,6 +20,7 @@ export class ItemCube extends Component {
     @property({ type: Node })
     light: Node = null;
 
+    eff
 
     start() {
 
@@ -54,6 +59,20 @@ export class ItemCube extends Component {
             .start()
     }
 
+
+    move3Point(p1: Vec3, p2: Vec3, p3: Vec3, time: number, wait: number = 0) {
+        let t = this;
+        tween(t.node)
+            .delay(wait)
+            .to(time / 3, { position: p1 })
+            .to(time / 3, { position: p2 })
+            .to(time / 3, { position: p3 })
+            .call(() => {
+            })
+            .start()
+    }
+
+
     moveByDoneAct(from: Vec3, time: number, die: boolean = true, wait: number = 0) {
         let t = this;
         tween(t.node)
@@ -73,6 +92,7 @@ export class ItemCube extends Component {
 
     turnLight(isActive: boolean) {
         let t = this;
+        // ligh and up
         t.light.active = isActive;
         tween(t.node)
             .by(Configute.timeAnim / 3, { position: new Vec3(0, isActive ? 30 : -30, 0) }, { easing: easing.quadOut })
@@ -82,15 +102,44 @@ export class ItemCube extends Component {
     }
 
     getPos() {
-        return this.node.getPosition(new Vec3);
+        return this.positionStand;
     }
 
     setPos(pos: Vec3) {
-        this.node.setPosition(pos);
+        let t = this;
+        t.positionStand = pos;
+        t.node.setPosition(pos);
+    }
+
+    getXindex() {
+        return this.XIndex;
+    }
+
+    setXindex(valueX: number) {
+        this.XIndex = valueX;
+    }
+
+    getYindex() {
+        return this.YIndex;
+    }
+
+    setYindex(valueY: number) {
+        this.YIndex = valueY;
     }
 
 
+    shakeCube() {
+        let t = this;
 
+        t.eff = tween(t.node)
+            .by(Configute.timeAnim, { eulerAngles: new Vec3(0, 0, 5), position: new Vec3(0, 5, 0) })
+            .by(Configute.timeAnim, { eulerAngles: new Vec3(0, 0, -10), position: new Vec3(0, -10, 0) })
+            .by(Configute.timeAnim, { eulerAngles: new Vec3(0, 0, 5), position: new Vec3(0, 5, 0) })
+            .call(() => { })
+            .start()
+
+
+    }
 
 }
 

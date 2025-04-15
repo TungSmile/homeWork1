@@ -59,3 +59,10 @@ export enum colorCube {
     Green = 9
 }
 
+export enum idX {
+    vtr = -4,
+    task = -3,
+    stock = -2,
+    store = -1
+}
+
