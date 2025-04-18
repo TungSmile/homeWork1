@@ -17,7 +17,8 @@ export enum statusCube {
 }
 
 export enum Configute {
-    timeAnim = 1, // defaul 1
+    timeAnim = 0.5
+    , // defaul 1
     heightCube = 100,
     weightSlot = 127,
     weightScene = 1080

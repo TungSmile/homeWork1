@@ -14,22 +14,23 @@ export class TaskMission extends Component {
     }
 
 
-    resetTask(type: number, icon: SpriteFrame, shadow: SpriteFrame) {
+    resetTask(type: number, icon: SpriteFrame, shadow: SpriteFrame, time: number, wait: number = 0) {
         let t = this;
         if (t.busy) { return }
         let door = t.node.getChildByName("door");
         let iconNode = t.node.getChildByName("icon");
         let shadowNode = t.node.getChildByName("shadowOfIcon");
         t.type = type
-        door.active = true;
         t.busy = true;
         tween(door)
-            .by(Configute.timeAnim / 2, { position: new Vec3(0, -120, 0) })
+            .delay(wait)
+            .call(() => { door.active = true; })
+            .by(time / 2, { position: new Vec3(0, -120, 0) })
             .call(() => {
                 iconNode.getComponent(Sprite).spriteFrame = icon;
                 shadowNode.getComponent(Sprite).spriteFrame = shadow;
             })
-            .by(Configute.timeAnim / 2, { position: new Vec3(0, 120, 0) })
+            .by(time / 2, { position: new Vec3(0, 120, 0) })
             .call(() => {
                 door.active = false;
                 t.busy = false;
@@ -37,14 +38,17 @@ export class TaskMission extends Component {
             .start();
     }
 
-    closeDoorForDone() {
+    closeDoorForDone(time: number, wait: number = 0) {
         let t = this;
         if (t.busy) { return }
         let door = t.node.getChildByName("door");
-        door.active = true;
         t.busy = true; // busy forever
         tween(door)
-            .by(Configute.timeAnim, { position: new Vec3(0, -120, 0) })
+            .delay(wait)
+            .call(() => {
+                door.active = true;
+            })
+            .by(time, { position: new Vec3(0, -120, 0) })
             .call(() => {
                 t.node.getChildByName("lightBoderDone").active = true;
 

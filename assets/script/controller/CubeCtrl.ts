@@ -251,19 +251,82 @@ export class CubeCtrl extends Component {
     }
 
     // cube move from slot to new slot
-    CMFSTNS(X: number, Y: number, posTo: Vec3, posCenter: Vec3, posFrom: Vec3, wait: number) {
+    CMFSTNS(X: number, Y: number, posTo: Vec3, posCenter: Vec3, posFrom: Vec3, time: number, wait: number) {
         let t = this;
-        let to = t.node.inverseTransformPoint(new Vec3(), posTo);
-        let center = t.node.inverseTransformPoint(new Vec3(), posCenter);
-        let from = t.node.inverseTransformPoint(new Vec3(), posFrom);
-        let cube = t.cubeTemp.getComponent(ItemCube)
-        cube.move3Point(to, center, from, Configute.timeAnim * 2, wait)
+        let to = posTo;
+        let center = posCenter;
+        let from = posFrom;
+        if (posTo.y > posCenter.y) {
+            center = new Vec3(posCenter.x, posTo.y, 0);
+        } else if (posTo.y < posCenter.y) {
+            to = new Vec3(posTo.x, posCenter.y, 0);
+        }
+
+        let cube = t.cubeTemp.getComponent(ItemCube);
+        if (posTo.x == posFrom.x) {
+            cube.move2Point(to, from, Configute.timeAnim * 1.5, wait);
+        } else
+            cube.move3Point(to, center, from, Configute.timeAnim * 1.5, wait);
         cube.turnLight(false);
         t.cubeTemp.setSiblingIndex(t.node.children.length)
         cube.setXindex(X);
         cube.setYindex(Y);
     }
 
+
+    // animation join 3 cube to center
+    AJTCTC(X: number, Y: number, time: number, wait: number) {
+        let t = this; let top; let center; let bot;
+        for (let i = 0; i < t.node.children.length; i++) {
+            let e = t.node.children[i];
+            let cube = e.getComponent(ItemCube);
+            if (cube.getXindex() == X) {
+                if (cube.getYindex() == Y) {
+                    center = e;
+                } else if (cube.getYindex() == Y + 1) {
+                    bot = cube
+                } else if (cube.getYindex() == Y - 1) {
+                    top = cube
+                }
+            }
+        }
+        t.scheduleOnce(() => {
+            bot.assignPos(center.getWorldPosition(new Vec3), time, true, 0);
+            top.assignPos(center.getWorldPosition(new Vec3), time, true, 0);
+        }, wait)
+    }
+
+    // animation cube to task
+    ACTT(X: number, Y: number, pos: Vec3, time: number, wait: number = 0) {
+        let t = this;
+        for (let i = 0; i < t.node.children.length; i++) {
+            let e = t.node.children[i];
+            let cube = e.getComponent(ItemCube);
+            if (cube.getXindex() == X && cube.getYindex() == Y) {
+                cube.assignPos(pos, time, true, wait);
+            }
+        }
+    }
+
+
+    // animatio cube to stock
+    ACTS(X: number, Y: number, pos: Vec3, time: number, wait: number = 0) {
+        let t = this;
+        let cube = t.cubeTemp.getComponent(ItemCube);
+        t.cubeTemp.setSiblingIndex(t.node.children.length)
+        cube.setXindex(X);
+        cube.setYindex(Y);
+        cube.assignPos(pos, time, false, wait);
+
+    }
+
+    // animation cube in stock to task
+    ACISTT(pos: Vec3, time: number, wait: number = 0) {
+        let t = this;
+        let cube = t.cubeTemp.getComponent(ItemCube);
+        t.cubeTemp.setSiblingIndex(t.node.children.length);
+        cube.assignPos(pos, time, true, wait);
+    }
 
 
     update(deltaTime: number) {

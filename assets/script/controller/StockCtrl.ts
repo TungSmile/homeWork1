@@ -14,9 +14,17 @@ export class StockCtrl extends Component {
 
     start() {
         let t = this;
-        t.setupData()
+        // t.setupData()
 
     }
+
+
+    createStock() {
+
+    }
+
+
+
 
 
     setupData() {
@@ -36,9 +44,9 @@ export class StockCtrl extends Component {
                 cell.on(Node.EventType.TOUCH_START, t.moreStock, t);
                 t.dataStock.push(typeSpecial.end);
             }
-
-
         }
+
+        return t.dataStock;
     }
 
     moreStock(e) {
@@ -49,8 +57,6 @@ export class StockCtrl extends Component {
 
     checkFreeStock() {
         let t = this;
-        log("check stock", t.dataStock)
-
         for (let i = 0; i < t.dataStock.length; i++) {
             if (t.dataStock[i] == typeSpecial.empty) {
                 return true
@@ -107,7 +113,10 @@ export class StockCtrl extends Component {
     }
 
 
-
+    getPosStockByIndex(index: number) {
+        let t = this;
+        t.dataStock[index]
+    }
 
     update(deltaTime: number) {
 

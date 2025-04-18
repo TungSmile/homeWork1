@@ -36,11 +36,11 @@ export class SlotCtrl extends Component {
             temp.setCapSlot(SetupGame.LengthSlot);
             temp.createSlot();
             e.name = "S" + i
-            e.getComponent(UITransform).setContentSize(new Size(Configute.weightSlot, cap * Configute.heightCube))
+            // e.getComponent(UITransform).setContentSize(new Size(Configute.weightSlot, cap * Configute.heightCube))
             t.node.addChild(e);
             e.setPosition(t.mapPosQuantity[i]);
             // e.on(Node.EventType.TOUCH_START, t.eventTouchPick, t);
-            e.on(Node.EventType.TOUCH_START, t.eventTouchSlot, t);
+            e.getChildByName("cells").on(Node.EventType.TOUCH_START, t.eventTouchSlot, t);
 
         }
     }
@@ -103,7 +103,7 @@ export class SlotCtrl extends Component {
 
     eventTouchSlot(e) {
         let t = this;
-        t.node.parent.emit("pickSlot", e.target.name);
+        t.node.parent.emit("pickSlot", e.target.parent.name);
     }
 
     getPosGateSlot(x: number) {

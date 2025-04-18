@@ -35,7 +35,7 @@ export class TaskCtrl extends Component {
             let temp = task.getComponent(TaskMission);
             let type = t.dataCreateTask[i];
             task.name = "T" + i;
-            temp.resetTask(type, t.icons[type], t.shadows[type]);
+            temp.resetTask(type, t.icons[type], t.shadows[type], Configute.timeAnim, 0);
             t.node.addChild(task);
             let posX = startX + (sizeTask * i);
             task.setPosition(new Vec3(posX, 0, 0));
@@ -45,17 +45,21 @@ export class TaskCtrl extends Component {
 
     getPosTaskByName(name: string) {
         let t = this;
-        let rs = t.node.getChildByName(name)?.getComponent(TaskMission)?.getPos()
+        let rs = t.node.getChildByName(name).getComponent(TaskMission).getPos()
         return rs ? rs : null;
     }
 
-    resetTask(name: string, type: number) {
+    resetTask(name: string, type: number, time: number, wait: number) {
         let t = this;
-        t.numTask++;
+        // t.numTask++;
         // let newType = t.dataCreateTask[type];
         // log(newType, "what new");
-        t.node.getChildByName(name)?.getComponent(TaskMission).resetTask(type, t.icons[type], t.shadows[type]);
+        t.node.getChildByName(name).getComponent(TaskMission).resetTask(type, t.icons[type], t.shadows[type], time, wait);
+    }
 
+    closeTask(name: string, time: number, wait: number) {
+        let t = this;
+        t.node.getChildByName(name).getComponent(TaskMission).closeDoorForDone(time, wait);
     }
 
     update(deltaTime: number) {

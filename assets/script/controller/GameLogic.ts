@@ -77,7 +77,7 @@ export class GameLogic extends Component {
                 if (stack > typeSpecial.empty) {
                     // tempSlot.push({ name: "C" + DataGame.instance.countCube, type: stack });
                     let pos = t.Slot.getPosByXY(i, j);
-                    let index = slot.length - j; // duyet nguoc
+                    // let index = slot.length - j; // duyet nguoc
                     t.Cube.createCube(stack, pos, t.listImgCube[stack], "S" + i, j)
                 } else {
                     // tempSlot.push({ name: "0", type: stack })
@@ -387,7 +387,7 @@ export class GameLogic extends Component {
 
         return true;
     }
-    
+
     caseSlotDone(index: number, name: string) {
         let t = this;
         let rs = true;

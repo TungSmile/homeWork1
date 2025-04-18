@@ -18,8 +18,8 @@ export class DataGame extends Component {
     }
 
     scriptCube = [0, 0, -1, -1, 1, 0, -1, -1, 8, 3, 4, 5, 2, 2, 6, 7, 1, 1, 7, 7];
-    scriptSlot = [[-1, -1, 0, 0], [-1, 0, 1, 1], [8, 3, 4, 5], [2, 2, 6, 7], [1, 1, 7, 7]];
-    scriptTask = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    scriptSlot = [[-1, -1, 0, 0], [-1, 0, 1, 1], [-1, 2, 1, 1], [-1, 2, 2, 7], [1, 1, 7, 7]];
+    scriptTask = [3, 3, 2, 7, 0, 1, 1];
 
 
 
@@ -29,7 +29,7 @@ export class DataGame extends Component {
     countCube: number = 0;
     statusTouch: statusTouch = statusTouch.Indle;
     countTurnPlay: number = 0;
-
+    isAnim: boolean = false;
 
     // readNameCustoms(name: string) {
     //     let index = name.slice(1);
