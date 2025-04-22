@@ -1,5 +1,5 @@
 import { _decorator, Component, Node, Vec3 } from 'cc';
-import { statusCube, statusTouch } from './Basic';
+import { CodeHexColor, statusCube, statusTouch } from './Basic';
 const { ccclass, property } = _decorator;
 
 @ccclass('DataGame')
@@ -18,13 +18,13 @@ export class DataGame extends Component {
     }
 
     scriptCube = [0, 0, -1, -1, 1, 0, -1, -1, 8, 3, 4, 5, 2, 2, 6, 7, 1, 1, 7, 7];
-    scriptSlot = [[-1, -1, 0, 0], [-1, 0, 1, 1], [-1, 2, 1, 1], [-1, 2, 2, 7], [1, 1, 7, 7]];
-    scriptTask = [3, 3, 2, 7, 0, 1, 1];
+    scriptSlot = [[-1, 0, 0], [0, 1, 1], [2, 1, 2], [2, 2, 7], [-1, 1, 1], [1, 7, 7], [-1, 2, 2]];
+    scriptTask = [2, 7, 0, 1, 1, 2];
 
 
+    colorTable = [CodeHexColor.Orange, CodeHexColor.Black, CodeHexColor.Red, CodeHexColor.Violet, CodeHexColor.Pink, CodeHexColor.Yellow, CodeHexColor.Gray, CodeHexColor.Blue, CodeHexColor.LightBlue, CodeHexColor.Green]
 
-
-    mapSlot = [new Vec3(-350, 250, 0), new Vec3(350, 250, 0), new Vec3(0, 0, 0), new Vec3(-350, -250, 0), new Vec3(350, -250, 0)];
+    mapSlot = [new Vec3(-400, 250, 0), new Vec3(400, 250, 0), new Vec3(150, 250, 0), new Vec3(-150, 250, 0), new Vec3(-250, -300, 0), new Vec3(0, -300, 0), new Vec3(250, -300, 0)];
     statusEvent: statusCube = statusCube.NoMove;
     countCube: number = 0;
     statusTouch: statusTouch = statusTouch.Indle;
@@ -36,11 +36,12 @@ export class DataGame extends Component {
     //     let type = name.slice(0, 1);
     // }
 
+    endGame: boolean = false;
+    isWin: boolean = false;
 
-
-
-
-
+    countCubeDone: number = 0;
+    countTaskDone: number = 0;
+    countSlotDone: number = 0;
 
 }
 

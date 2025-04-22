@@ -1,6 +1,6 @@
 import { _decorator, Component, instantiate, log, Node, Prefab, Size, UITransform, Vec3 } from 'cc';
 import { SlotHold } from '../model/SlotHold';
-import { Configute, SetupGame, statusCube, TypeKeeper } from '../data/Basic';
+import { ConditionEndGame, Configute, SetupGame, statusCube, TypeKeeper } from '../data/Basic';
 import { DataGame } from '../data/DataGame';
 const { ccclass, property } = _decorator;
 
@@ -36,7 +36,7 @@ export class SlotCtrl extends Component {
             temp.setCapSlot(SetupGame.LengthSlot);
             temp.createSlot();
             e.name = "S" + i
-            // e.getComponent(UITransform).setContentSize(new Size(Configute.weightSlot, cap * Configute.heightCube))
+            e.getComponent(UITransform).setContentSize(new Size(Configute.weightSlot + Configute.heightCube, (cap + 2) * Configute.heightCube))
             t.node.addChild(e);
             e.setPosition(t.mapPosQuantity[i]);
             // e.on(Node.EventType.TOUCH_START, t.eventTouchPick, t);
@@ -70,17 +70,20 @@ export class SlotCtrl extends Component {
 
 
 
-    doneSlot(name: string) {
+    doneSlot(index: number, time: number, wait: number = 0) {
         let t = this;
-        let slot = t.node?.getChildByName(name);
+        let slot = t.node.getChildByName("S" + index);
         slot.off(Node.EventType.TOUCH_START, t.eventTouchPick, t);
         slot.on(Node.EventType.TOUCH_START, t.eventDoneSlot, t);
-        slot.getComponent(SlotHold).animClose();
+        slot.getComponent(SlotHold).animClose(time, wait);
+
     }
 
     eventDoneSlot(e) {
         let t = this;
         t.node.parent.emit("doneSlot", e.target.name);
+        DataGame.instance.countSlotDone++;
+        t.checkEndGame();
     }
 
 
@@ -113,7 +116,12 @@ export class SlotCtrl extends Component {
 
     }
 
-
+    checkEndGame() {
+        if (DataGame.instance.countSlotDone == ConditionEndGame.SlotDone) {
+            DataGame.instance.endGame = true;
+            DataGame.instance.isWin = true;
+        }
+    }
 
     update(deltaTime: number) {
 

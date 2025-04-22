@@ -1,7 +1,7 @@
 import { _decorator, Component, instantiate, log, Node, Prefab, SpriteFrame, Vec3 } from 'cc';
 import { DataGame } from '../data/DataGame';
 import { ItemCube } from '../model/ItemCube';
-import { Configute, idX, SetupGame } from '../data/Basic';
+import { caseSound, ConditionEndGame, Configute, idX, SetupGame, typeSpecial } from '../data/Basic';
 const { ccclass, property } = _decorator;
 
 @ccclass('CubeCtrl')
@@ -13,7 +13,8 @@ export class CubeCtrl extends Component {
 
 
     start() {
-
+        let t = this;
+        t.node.on("checkWin", t.CEGWDAC, t);
     }
 
     createCube(type: number, posWrold: Vec3, imgIcon: SpriteFrame, nameKeeper: string, indexStack: number) {
@@ -30,6 +31,7 @@ export class CubeCtrl extends Component {
         temp.setType(type);
         temp.setNameKeeper(nameKeeper);
         temp.setIndexInStack(indexStack);
+        temp.setColorTail(DataGame.instance.colorTable[type])
     }
 
     findCubeByNameKeeperAndIndex(name: string, index: number) {
@@ -232,6 +234,8 @@ export class CubeCtrl extends Component {
             let cube = e.getComponent(ItemCube);
             if (cube.getXindex() == X && cube.getYindex() == Y) {
                 cube.turnLight(true);
+                t.node.parent.emit("sound", caseSound.Tap)
+                break;
             }
         }
 
@@ -245,6 +249,8 @@ export class CubeCtrl extends Component {
             let cube = e.getComponent(ItemCube);
             if (cube.getXindex() == X && cube.getYindex() == Y) {
                 cube.turnLight(false);
+                t.node.parent.emit("sound", caseSound.Drop1);
+                break;
             }
         }
 
@@ -293,6 +299,7 @@ export class CubeCtrl extends Component {
         t.scheduleOnce(() => {
             bot.assignPos(center.getWorldPosition(new Vec3), time, true, 0);
             top.assignPos(center.getWorldPosition(new Vec3), time, true, 0);
+            t.node.parent.emit("sound", caseSound.CombineCube)
         }, wait)
     }
 
@@ -304,6 +311,8 @@ export class CubeCtrl extends Component {
             let cube = e.getComponent(ItemCube);
             if (cube.getXindex() == X && cube.getYindex() == Y) {
                 cube.assignPos(pos, time, true, wait);
+                t.node.parent.emit("sound", caseSound.DoneTask)
+                break;
             }
         }
     }
@@ -317,7 +326,6 @@ export class CubeCtrl extends Component {
         cube.setXindex(X);
         cube.setYindex(Y);
         cube.assignPos(pos, time, false, wait);
-
     }
 
     // animation cube in stock to task
@@ -326,8 +334,41 @@ export class CubeCtrl extends Component {
         let cube = t.cubeTemp.getComponent(ItemCube);
         t.cubeTemp.setSiblingIndex(t.node.children.length);
         cube.assignPos(pos, time, true, wait);
+        t.node.parent.emit("sound", caseSound.DoneTask)
     }
 
+
+    // check cube done all
+    CCDA(wait: number) {
+        let t = this;
+        log("check end game")
+        t.scheduleOnce(() => {
+            for (let i = 0; i < t.node.children.length; i++) {
+                let e = t.node.children[i];
+                let cube = e.getComponent(ItemCube);
+                if (cube.getXindex() > typeSpecial.empty) {
+                    log('not end')
+                    return
+                }
+            }
+            // if (t.node.children.length > 0) {
+            //     return false
+            // }
+            DataGame.instance.endGame = true;
+            DataGame.instance.isWin = true;
+            t.node.parent.emit("endGame");
+        }, wait)
+    }
+
+    // check end game when done all cube
+    CEGWDAC() {
+        let t = this;
+        log("count : " + DataGame.instance.countCubeDone)
+        if (DataGame.instance.countCubeDone == ConditionEndGame.CubeDone) {
+            DataGame.instance.endGame = true;
+            DataGame.instance.isWin = true;
+        }
+    }
 
     update(deltaTime: number) {
 

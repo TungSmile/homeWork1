@@ -26,10 +26,10 @@ export enum Configute {
 
 
 export enum SetupGame {
-    TotalTask = 4,
+    TotalTask = 2,
     Stock = 5,
-    TotalSlot = 5,
-    LengthSlot = 4,
+    TotalSlot = 7,
+    LengthSlot = 3,
     TotalStore = 1,
     ConditionDone = 3
 }
@@ -67,3 +67,46 @@ export enum idX {
     store = -1
 }
 
+export enum pairOfAngles90 {  // obj *90
+    notBelong = -2,
+    up = -1,
+    right = 2,
+    down = 1,
+    left = 0
+}
+
+export enum CodeHexColor {
+    Orange = "#EE6A33A3",
+    Black = "#545454A3",
+    Red = "#C30109A3",
+    Violet = "#DF286FA3",
+    Pink = "#B523D7",
+    Yellow = "#FBBC2A",
+    Gray = "#B2B2B2",
+    Blue = "#0845CF",
+    LightBlue = "#22B4FF",
+    Green = "#64DE5D"
+};
+
+export enum ConditionEndGame {
+    TaskDone = 6,
+    CubeDone = 18,
+    StockNotFree = 4,
+    TaskFree = 4,
+    SlotDone = 6,
+}
+
+export enum linkStore {
+    android = "https://play.google.com/store/apps/details?id=com.gplay.wood.blocks.color.sort",
+    ios = "https://play.google.com/store/apps/details?id=com.gplay.wood.blocks.color.sort",
+    defaul = "https://play.google.com/store/apps/details?id=com.gplay.wood.blocks.color.sort"
+}
+
+export enum caseSound {
+    Tap = 0,
+    Drop1 = 1,
+    Drop2 = 2,
+    Drop3 = 3,
+    DoneTask = 4,
+    CombineCube = 5
+}

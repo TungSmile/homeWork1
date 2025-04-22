@@ -1,10 +1,11 @@
-import { _decorator, Component, log, SpriteFrame, Vec3, Node } from 'cc';
+import { _decorator, Component, log, SpriteFrame, Vec3, Node, AudioSource, AudioClip } from 'cc';
 import { SlotCtrl } from './SlotCtrl';
 import { StockCtrl } from './StockCtrl';
 import { TaskCtrl } from './TaskCtrl';
 import { CubeCtrl } from './CubeCtrl';
 import { DataGame } from '../data/DataGame';
-import { Configute, idX, SetupGame, typeSpecial } from '../data/Basic';
+import { caseSound, Configute, idX, linkStore, SetupGame, typeSpecial } from '../data/Basic';
+import super_html_playable from '../plugin/super_html_playable';
 const { ccclass, property } = _decorator;
 
 @ccclass('CtrGame')
@@ -12,6 +13,8 @@ export class CtrGame extends Component {
 
     @property({ type: [SpriteFrame] })
     listImgCube: SpriteFrame[] = [];
+    @property({ type: [AudioClip] })
+    listSound: AudioClip[] = [];
 
     @property({ type: SlotCtrl })
     Slot: SlotCtrl = null;
@@ -41,14 +44,23 @@ export class CtrGame extends Component {
 
     isAnim: boolean = false;
 
+    endGame: boolean = true;
+
     start() {
         let t = this;
         t.node.on("pickSlot", t.clickSlot, t);
         t.node.on("doneSlot", t.CDP, t);
+        t.node.on("sound", t.CS, t)
+        t.node.on("endGame", t.CCWOLG, t)
         t.createTask();
         t.createSlot();
         t.createCube();
         t.createStock();
+        super_html_playable.set_google_play_url(linkStore.android);
+        super_html_playable.set_app_store_url(linkStore.ios);
+        t.schedule(() => {
+            t.CCWOLG()
+        }, Configute.timeAnim)
     }
 
 
@@ -129,15 +141,16 @@ export class CtrGame extends Component {
             t.SlotTwo = index;
             log("case 3")
             if (t.AMCWS()) {
+                t.ASD()
                 // clean data for test
                 t.ACD();
                 t.CDP();
-                log("cube move")
+                log("case 4")
             } else {
                 // cube cant move
                 t.ACD();
                 t.CDP();
-                log("case 4")
+                log("case 5")
                 return;
             }
 
@@ -206,12 +219,10 @@ export class CtrGame extends Component {
     }
 
 
-
     // animation cube move with Slot
     AMCWS() {
         let t = this;
         let countStackFree: number = 0;
-
         for (let i = 0; i < t.dataSlot[t.SlotTwo].length; i++) {
             let stack = t.dataSlot[t.SlotTwo][i];
             if (stack != typeSpecial.end) {
@@ -222,17 +233,11 @@ export class CtrGame extends Component {
                 return false;
             }
         }
-
-
-
-
-
         // check new slot enuogh 
         if (countStackFree <= 0) {
             log("case 5a")
             return false;
         }
-
         //  not same type pick
         if (countStackFree < t.dataSlot[t.SlotTwo].length && t.dataSlot[t.SlotTwo][countStackFree] != t.typePick) {
             log("case 5b")
@@ -285,42 +290,38 @@ export class CtrGame extends Component {
             t.dataSlot[t.SlotTwo][indexCubeDone + 2] = typeSpecial.empty;
             t.Cube.AJTCTC(t.SlotTwo, indexCubeDone + 1, Configute.timeAnim / 2, timeWaitAnim)
             timeWaitAnim = timeWaitAnim + Configute.timeAnim / 2; // 1.8+0.5 ,1.5+0.5
+            log(t.dataTask, "check task", t.sttTask, DataGame.instance.countTaskDone)
             for (let i = 0; i < t.dataTask.length; i++) {
                 if (t.dataTask[i] == t.typePick) {
-                    let sttTask = "T" + i;
                     t.Cube.ACTT(t.SlotTwo
                         , indexCubeDone + 1
-                        , t.Task.getPosTaskByName(sttTask)
+                        , t.Task.getPosTaskByIndex(i)
                         , Configute.timeAnim
                         , timeWaitAnim);
                     timeWaitAnim += Configute.timeAnim;
-                    // let typeNew = DataGame.instance.scriptTask[t.sttTask];
-                    if (DataGame.instance.scriptTask.length > t.sttTask) {
-                        t.Task.resetTask(sttTask, DataGame.instance.scriptTask[t.sttTask], Configute.timeAnim, timeWaitAnim);
-                        t.dataTask[i] = DataGame.instance.scriptTask[t.sttTask];
-                        t.WHTCS(i, sttTask, DataGame.instance.scriptTask[t.sttTask], timeWaitAnim);
+                    let typeNew = DataGame.instance.scriptTask[t.sttTask];
+                    if (typeNew != undefined) {
+                        t.Task.resetTask(i, typeNew, Configute.timeAnim, timeWaitAnim);
+                        t.dataTask[i] = typeNew;
+                        timeWaitAnim += Configute.timeAnim;
                         t.sttTask++;
+                        t.WHTCS(i, typeNew, timeWaitAnim);
                     } else {
-                        t.Task.closeTask(sttTask, Configute.timeAnim, timeWaitAnim);
+                        t.Task.closeTask(i, Configute.timeAnim, timeWaitAnim);
                         t.dataTask[i] = typeSpecial.end;
                     }
                     timeWaitAnim += Configute.timeAnim;
                     t.scheduleOnce(() => {
                         DataGame.instance.isAnim = false
                     }, timeWaitAnim);
-                    //
-                    // add more case after reset task  has task same type stock
-                    //
-
-
                     if (t.CATD()) {
-                        DataGame.instance.isAnim = true
+                        DataGame.instance.isAnim = true;
+                        DataGame.instance.endGame = true;
+                        DataGame.instance.isWin = true;
                         t.scheduleOnce(() => {
                             t.Ads.active = true;
                         }, Configute.timeAnim * 4)
                     }
-
-
                     return true;
                 }
             }
@@ -333,20 +334,21 @@ export class CtrGame extends Component {
                 t.dataStock[index] = t.typePick;
                 timeWaitAnim += Configute.timeAnim / 2
             } else {
-                DataGame.instance.isAnim = true
+                DataGame.instance.isAnim = true;
+                DataGame.instance.endGame = true;
+                DataGame.instance.isWin = false;
                 t.scheduleOnce(() => {
                     t.Ads.active = true
-                }, Configute.timeAnim * 4)
+                }, timeWaitAnim)
             }
         }
+        t.CCWOLG();
         t.scheduleOnce(() => {
             DataGame.instance.isAnim = false;
-
         }, timeWaitAnim)
 
         return true;
     }
-
 
 
     // check all task done
@@ -359,7 +361,6 @@ export class CtrGame extends Component {
         }
         return true;
     }
-
 
 
     // get index by cut element frist in name node
@@ -391,63 +392,79 @@ export class CtrGame extends Component {
     /// func for stock
 
     //when has new task check stock has same type
-    WHTCS(indexTask: number, nameTask: string, type: number, wait: number) {
+    WHTCS(indexTask: number, type: number, wait: number) {
         let t = this;
-        log("???")
-        // t.sttTask++;
         for (let i = 0; i < t.dataStock.length; i++) {
             let e = t.dataStock[i];
             if (e == type) {
-                t.Cube.findCubeByXY(idX.stock, e);
-                t.Cube.ACISTT(t.Task.getPosTaskByName(nameTask), Configute.timeAnim / 2, wait);
+                t.Cube.findCubeByXY(idX.stock, i);
+                t.Cube.ACISTT(t.Task.getPosTaskByIndex(indexTask), Configute.timeAnim / 2, wait);
                 t.dataStock[i] = typeSpecial.empty;
-                if (DataGame.instance.scriptTask.length > t.sttTask) {
+                let valueNext = DataGame.instance.scriptTask[t.sttTask];
+                if (valueNext != undefined) {
+                    t.sttTask++;
                     t.scheduleOnce(() => {
-                        t.Task.resetTask(nameTask, DataGame.instance.scriptTask[t.sttTask], Configute.timeAnim, Configute.timeAnim / 2);
-                        t.WHTCS(indexTask, nameTask, DataGame.instance.scriptTask[t.sttTask], Configute.timeAnim);
-                        t.sttTask++
-                        log('ca3');
-                    }, wait + Configute.timeAnim / 2)
-                    t.dataTask[indexTask] = DataGame.instance.scriptTask[t.sttTask];
+                        t.dataTask[indexTask] = valueNext;
+                        t.Task.resetTask(indexTask, valueNext, Configute.timeAnim, Configute.timeAnim / 2);
+                        t.WHTCS(indexTask, valueNext, Configute.timeAnim + Configute.timeAnim / 2)
+                    }, wait + Configute.timeAnim / 2);
+                    break;
                 } else {
                     t.scheduleOnce(() => {
-                        t.Task.closeTask(nameTask, Configute.timeAnim, 0);
-                        log('ca4');
-                    }, wait + Configute.timeAnim / 2)
-                    t.dataTask[indexTask] = typeSpecial.end;
-
+                        t.dataTask[indexTask] = typeSpecial.end;
+                        t.Task.closeTask(indexTask, Configute.timeAnim, 0);
+                    }, wait + Configute.timeAnim / 2);
                 }
-
-
-
-
             }
         }
-        // if (check) {
-        //     // log(t.sttTask, 'check num task')
-        //     // let temp = t.sttTask + 1;
-        //     if (DataGame.instance.scriptTask.length > t.sttTask) {
-        //         t.scheduleOnce(() => {
-        //             t.sttTask++;
-        //             t.Task.resetTask(nameTask, DataGame.instance.scriptTask[t.sttTask], Configute.timeAnim, 0);
-        //             t.WHTCS(indexTask, nameTask, DataGame.instance.scriptTask[t.sttTask], Configute.timeAnim);
-        //             log('casea3');
-        //         }, wait + Configute.timeAnim / 2)
-        //         t.dataTask[indexTask] = DataGame.instance.scriptTask[t.sttTask];
-        //         // t.WHTCS(indexTask, nameTask, DataGame.instance.scriptTask[t.sttTask], wait + Configute.timeAnim / 2 + Configute.timeAnim)
-        //     } else {
-        //         t.scheduleOnce(() => {
-        //             t.Task.closeTask(nameTask, Configute.timeAnim, 0);
-        //             log('caseb');
-        //         }, wait + Configute.timeAnim / 2)
-        //         t.dataTask[indexTask] = typeSpecial.end;
-
-        //     }
-        // }
+        log(t.dataTask, "data àter")
     }
 
+    /// func for slot
+
+    // animation slot done
+    ASD() {
+        let t = this;
+        for (let i = 0; i < t.dataSlot[t.SlotTwo].length; i++) {
+            if (t.dataSlot[t.SlotTwo][i] != typeSpecial.empty) {
+                return
+            }
+        }
+        t.dataSlot[t.SlotTwo] = new Array(t.dataSlot[t.SlotTwo].length).fill(typeSpecial.end)
+        t.Slot.doneSlot(t.SlotTwo, Configute.timeAnim, Configute.timeAnim * 2);
+    }
+
+    /// event ui
 
 
+    // check case win or lose game
+
+    CCWOLG() {
+        let t = this;
+        if (DataGame.instance.endGame && t.endGame) {
+            t.endGame = false;
+            t.scheduleOnce(() => {
+                t.Ads.active = DataGame.instance.endGame;
+                t.Ads.getChildByName("win").active = DataGame.instance.isWin;
+                t.Ads.getChildByName("lose").active = !DataGame.instance.isWin;
+            }, Configute.timeAnim * 4)
+        }
+
+    }
+
+    // controll sound
+    CS(sttCase: number, vol: number = 1) {
+        let t = this;
+        let as = t.node.getComponent(AudioSource);
+        as.stop();
+        as.clip = t.listSound[sttCase]
+        as.volume = vol;
+        as.play();
+    }
+
+    openAdUrl() {
+        super_html_playable.download();
+    }
 
     update(deltaTime: number) {
 

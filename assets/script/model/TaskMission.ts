@@ -1,4 +1,4 @@
-import { _decorator, Component, Sprite, SpriteFrame, tween, Vec3 } from 'cc';
+import { _decorator, Color, color, Component, Sprite, SpriteFrame, tween, UIOpacity, Vec3 } from 'cc';
 import { Configute } from '../data/Basic';
 const { ccclass, property } = _decorator;
 
@@ -54,6 +54,7 @@ export class TaskMission extends Component {
 
             })
             .start();
+        
     }
 
 

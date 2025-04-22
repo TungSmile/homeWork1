@@ -1,5 +1,6 @@
-import { _decorator, CapsuleCollider, Component, easing, log, Node, Sprite, SpriteFrame, tween, Vec3 } from 'cc';
-import { Configute, TypeKeeper } from '../data/Basic';
+import { _decorator, CapsuleCollider, Color, Component, easing, log, Node, ParticleSystem2D, Sprite, SpriteFrame, tween, Vec3 } from 'cc';
+import { Configute, pairOfAngles90, TypeKeeper } from '../data/Basic';
+import { DataGame } from '../data/DataGame';
 const { ccclass, property } = _decorator;
 
 @ccclass('ItemCube')
@@ -20,10 +21,16 @@ export class ItemCube extends Component {
     @property({ type: Node })
     light: Node = null;
 
+    @property({ type: Node })
+    parSys2D: Node = null;
+
     eff
     eff1
 
+    directorMoving: pairOfAngles90 = pairOfAngles90.notBelong;
+
     start() {
+
 
     }
 
@@ -62,24 +69,54 @@ export class ItemCube extends Component {
 
     move2Point(p1: Vec3, p2: Vec3, time: number, wait: number = 0) {
         let t = this;
+        let originPos = t.node.getWorldPosition(new Vec3)
         tween(t.node)
             .delay(wait)
+            .call(() => {
+                // t.caclutationAngles(originPos, p1);
+                t.ctrTail();
+            })
             .to(time / 2, { worldPosition: p1 })
+            .call(() => {
+                // t.caclutationAngles(p1, p2);
+                // t.ctrTail();
+            })
             .to(time / 2, { worldPosition: p2 })
             .call(() => {
-                t.positionStand = p2
+                t.ctrTail(false);
+                t.positionStand = p2;
             })
             .start()
     }
 
     move3Point(p1: Vec3, p2: Vec3, p3: Vec3, time: number, wait: number = 0) {
         let t = this;
+        let originPos = t.node.getWorldPosition(new Vec3)
+        let oTop1 = Vec3.distance(originPos, p1)
+        let p1Top2 = Vec3.distance(p1, p2)
+        let p2Top3 = Vec3.distance(p2, p3)
+        let v = time / (oTop1 + p1Top2 + p2Top3)
+
         tween(t.node)
             .delay(wait)
-            .to(time / 3, { worldPosition: p1 })
-            .to(time / 3, { worldPosition: p2 })
-            .to(time / 3, { worldPosition: p3 })
             .call(() => {
+                // t.caclutationAngles(originPos, p1);
+                t.ctrTail();
+            })
+            .to(v * oTop1, { worldPosition: p1 }, { easing: "quintIn" })
+            .call(() => {
+                // t.caclutationAngles(p1, p2);
+                // t.ctrTail();
+            })
+            .to(v * p1Top2, { worldPosition: p2 })
+            .call(() => {
+                // t.caclutationAngles(p2, p3);
+                // t.ctrTail();
+            })
+            .to(v * p2Top3, { worldPosition: p3 })
+            .call(() => {
+                // t.caclutationAngles(p3, p2);
+                t.ctrTail(false);
                 t.positionStand = p3
 
             })
@@ -100,14 +137,17 @@ export class ItemCube extends Component {
             .start()
     }
 
-
     moveByDoneAct(from: Vec3, time: number, die: boolean = true, wait: number = 0) {
         let t = this;
         tween(t.node)
             .delay(wait)
             .to(time, { position: from })
             .call(() => {
-                die ? t.node.destroy() : 0
+                if (die) {
+                    DataGame.instance.countCubeDone++;
+                    t.node.parent.emit("checkWin");
+                    t.node.destroy();
+                }
             })
             .start()
     }
@@ -134,7 +174,6 @@ export class ItemCube extends Component {
                         t.icon.setRotationFromEuler(new Vec3(0, 0, 0))
                         t.light.setPosition(new Vec3(0, 0, 0))
                         t.light.setRotationFromEuler(new Vec3(0, 0, 0))
-
                     }
                     t.eff = null;
                     t.eff1 = null;
@@ -178,6 +217,8 @@ export class ItemCube extends Component {
                 .to(time, { worldPosition: pos })
                 .delay(time / 10)
                 .call(() => {
+                    DataGame.instance.countCubeDone++;
+                    t.node.parent.emit("checkWin");
                     t.node.destroy();
                 })
                 .start()
@@ -192,7 +233,6 @@ export class ItemCube extends Component {
 
 
     }
-
 
     shakeCube() {
         let t = this;
@@ -236,6 +276,56 @@ export class ItemCube extends Component {
 
 
     }
+
+    ctrTail(isAct: boolean = true) {
+        let t = this;
+
+        let par = t.parSys2D.getComponent(ParticleSystem2D);
+        // par.resetSystem()
+        isAct ? par.resetSystem() : par.stopSystem();
+        t.parSys2D.active = isAct;
+        // if (isAct) {
+        //     // t.parSys2D.getComponent(ParticleSystem2D).
+        //     // par.angle = 90 * t.directorMoving;
+        // }
+        // else {
+        //     par.resetSystem();
+        // }
+    }
+
+    setColorTail(nameColor: string) {
+        let t = this;
+        let par = t.parSys2D.getComponent(ParticleSystem2D);
+        par.startColor = new Color(nameColor);
+    }
+
+
+
+
+    caclutationAngles(to: Vec3, from: Vec3) {
+        let t = this;
+        if (to.x == from.x) {
+            if (to.y < from.y) {
+                t.directorMoving = pairOfAngles90.up;
+                return;
+            } else if (to.y > from.y) {
+                t.directorMoving = pairOfAngles90.down;
+                return;
+            }
+        }
+        if (to.y == from.y) {
+            if (to.x < from.x) {
+                t.directorMoving = pairOfAngles90.right;
+                return;
+            } else if (to.y > from.y) {
+                t.directorMoving = pairOfAngles90.left;
+                return;
+            }
+        }
+        t.directorMoving = pairOfAngles90.notBelong;
+    }
+
+
 
 }
 

@@ -351,7 +351,7 @@ export class GameLogic extends Component {
         let nameTemp = null;
         let indexStack = null;
         if (rsCheckTask != -1) {
-            posNew = t.Task.getPosTaskByName("T" + rsCheckTask);
+            posNew = t.Task.getPosTaskByIndex("T" + rsCheckTask);
             nameTemp = "T" + rsCheckTask;
             indexStack = rsCheckTask;
             t.sttTaskScript++

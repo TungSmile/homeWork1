@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Size, tween, UITransform, Vec3, Node, log, Mat4 } from 'cc';
+import { _decorator, Component, instantiate, Size, tween, UITransform, Vec3, Node, log, Mat4, UIOpacity } from 'cc';
 import { Configute, TypeKeeper } from '../data/Basic';
 const { ccclass } = _decorator;
 
@@ -75,15 +75,27 @@ export class SlotHold extends Component {
     }
 
 
-    animClose() {
+    animClose(time: number, wait: number = 0) {
         let t = this;
         let door = t.node.getChildByName("door");
-        door.active = true;
         tween(door)
-            .to(Configute.timeAnim, { position: new Vec3(2, -155, 0) })
+            .delay(wait).call(() => {
+                door.active = true;
+            })
+            .to(time, { position: new Vec3(2, -155, 0) })
             .call(() => {
                 t.node.getChildByName("done").active = true;
                 t.node.getChildByName("lightDone").active = true;
+            })
+            .start();
+
+        tween(door.getComponent(UIOpacity))
+            .delay(wait)
+            .by(time, {
+                opacity: 255
+            })
+            .call(() => {
+
             })
             .start();
     }

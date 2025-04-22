@@ -43,23 +43,21 @@ export class TaskCtrl extends Component {
     }
 
 
-    getPosTaskByName(name: string) {
+    getPosTaskByIndex(index: number) {
         let t = this;
-        let rs = t.node.getChildByName(name).getComponent(TaskMission).getPos()
+        let rs = t.node.getChildByName("T" + index).getComponent(TaskMission).getPos()
         return rs ? rs : null;
     }
 
-    resetTask(name: string, type: number, time: number, wait: number) {
+    resetTask(index: number, type: number, time: number, wait: number) {
         let t = this;
-        // t.numTask++;
-        // let newType = t.dataCreateTask[type];
-        // log(newType, "what new");
-        t.node.getChildByName(name).getComponent(TaskMission).resetTask(type, t.icons[type], t.shadows[type], time, wait);
+        t.node.getChildByName("T" + index).getComponent(TaskMission).resetTask(type, t.icons[type], t.shadows[type], time, wait);
+        DataGame.instance.countTaskDone++;
     }
 
-    closeTask(name: string, time: number, wait: number) {
+    closeTask(index: number, time: number, wait: number) {
         let t = this;
-        t.node.getChildByName(name).getComponent(TaskMission).closeDoorForDone(time, wait);
+        t.node.getChildByName("T" + index).getComponent(TaskMission).closeDoorForDone(time, wait);
     }
 
     update(deltaTime: number) {
