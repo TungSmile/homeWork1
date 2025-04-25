@@ -6,6 +6,7 @@ import { CubeCtrl } from './CubeCtrl';
 import { DataGame } from '../data/DataGame';
 import { caseSound, Configute, idX, linkStore, SetupGame, typeSpecial } from '../data/Basic';
 import super_html_playable from '../plugin/super_html_playable';
+import { StoreCtrl } from './StoreCtrl';
 const { ccclass, property } = _decorator;
 
 @ccclass('CtrGame')
@@ -24,7 +25,8 @@ export class CtrGame extends Component {
     Task: TaskCtrl = null;
     @property({ type: CubeCtrl })
     Cube: CubeCtrl = null;
-
+    @property({ type: StoreCtrl })
+    Store: StoreCtrl = null;
 
     @property(Node)
     Ads: Node = null;
@@ -56,6 +58,7 @@ export class CtrGame extends Component {
         t.createSlot();
         t.createCube();
         t.createStock();
+        t.createStore();
         super_html_playable.set_google_play_url(linkStore.android);
         super_html_playable.set_app_store_url(linkStore.ios);
         t.schedule(() => {
@@ -104,6 +107,11 @@ export class CtrGame extends Component {
         t.dataStock = t.Stock.setupData();
     }
 
+    createStore() {
+        let t = this;
+        t.Store.createStore();
+        t.dataStore = [...DataGame.instance.scriptStore];
+    }
 
 
 

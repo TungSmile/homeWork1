@@ -110,3 +110,7 @@ export enum caseSound {
     DoneTask = 4,
     CombineCube = 5
 }
+export enum styleStore {
+    Conveyor = 0,
+    Cave = 1
+}
